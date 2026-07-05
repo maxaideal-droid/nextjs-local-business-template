@@ -1,0 +1,26 @@
+name: Notify Google Indexing API
+
+# Triggers on every push to main.
+# Waits 90 seconds for Netlify to finish deploying before submitting URLs.
+# Requires two repository secrets (Settings > Secrets and variables > Actions):
+#   GOOGLE_SERVICE_ACCOUNT_KEY  — full JSON content of your service account key file
+#   SITE_DOMAIN                 — your live domain, e.g. https://acmelocal.com
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for Netlify deploy
+        run: sleep 90
+
+      - name: Submit URLs to Google Indexing API
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          SITE_DOMAIN: ${{ secrets.SITE_DOMAIN }}
+        run: node scripts/index-pages.mjs

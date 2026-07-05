@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/verify-seo.mjs",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "fetch-images": "node scripts/fetch-pexels.mjs",
+    "index-pages": "node scripts/index-pages.mjs"
   },
   "dependencies": {
     "next": "16.2.10",
@@ -18,6 +20,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cheerio": "^1.2.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
