@@ -95,6 +95,6 @@ console.log(`Submitting ${urls.length} URLs to Google Indexing API...`);
 for (const url of urls) {
   const result = await submitUrl(url, token);
   const ok = result.urlNotificationMetadata;
-  console.log(`${ok ? "ok" : "fail"} ${url}${ok ? "" : " -- " + JSON.stringify(result)}`);
+  console.log(`${ok ? "✓" : "✗"} ${url}${ok ? "" : " — " + JSON.stringify(result)}`);
 }
 console.log("Done.");

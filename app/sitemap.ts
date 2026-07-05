@@ -12,6 +12,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
+  const servicePages = site.servicePages.map((page) => ({
+    url: `${site.domain}/services/${page.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.9,
+  }));
+
   return [
     {
       url: site.domain,
@@ -25,6 +32,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    ...(site.servicePages.length > 0 ? [{ url: `${site.domain}/services`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.9 }] : []),
+    ...servicePages,
     ...blogPosts,
   ];
 }

@@ -48,7 +48,9 @@ Spin up a fully SEO-instrumented local business site in under an hour.
 - [ ] Choose **HTML tag** verification → copy the `content="..."` value
 - [ ] Add it to `config/site.ts` as `gscVerification`
 - [ ] Push to GitHub → wait for Netlify deploy → click **Verify** in GSC
-- [ ] In GSC: **Sitemaps** → submit `sitemap.xml`
+- [ ] In GSC: **Sitemaps** → submit `https://yourdomain.com/sitemap.xml`
+
+> **Note:** After Phase 5 (Indexing API), you never need to manually submit URLs to GSC again — every push handles it automatically.
 
 ---
 
@@ -80,7 +82,10 @@ This makes every push to `main` automatically notify Google of all updated URLs.
 - [ ] In GitHub repo: **Settings → Secrets and variables → Actions → New secret**
   - Name: `GOOGLE_SERVICE_ACCOUNT_KEY`
   - Value: paste the entire contents of the downloaded JSON file
-- [ ] Push any change → check the **Actions tab** → confirm green checkmark
+- [ ] In GitHub repo: **Settings → Secrets and variables → Actions → New secret**
+  - Name: `SITE_DOMAIN`
+  - Value: your live domain, e.g. `https://acmelocal.com`
+- [ ] Push any change → check the **Actions tab** → confirm green checkmark with ✓ next to each URL
 
 ---
 
@@ -108,8 +113,9 @@ This makes every push to `main` automatically notify Google of all updated URLs.
 ## Working on the site day-to-day
 
 - **Always** update `config/site.ts` first — never hardcode business details in components
+- **Adding a city landing page:** create `app/services/[slug]/page.tsx`, then add one entry to `servicePages` in `config/site.ts` — the nav dropdown, footer links, Service Areas section, and sitemap all update automatically
 - **Every blog post** needs `seoTitle` if the H1 title is longer than ~38 chars
-- **After Phase 5**, every push to `main` triggers the GitHub Action — no manual GSC submission needed
+- **After Phase 5**, every push to `main` triggers the GitHub Action — reads the live sitemap and submits every URL to Google automatically. No manual GSC work ever again.
 - **Build must pass** before marking any task done — `npm run build` with 0 errors, 0 warnings
 - **Read `on-page-seo.md`** before generating any page or blog post
 - **Read `references/voice.md`** before writing any customer-facing copy

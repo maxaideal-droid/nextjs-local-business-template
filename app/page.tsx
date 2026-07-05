@@ -6,6 +6,7 @@ import Services from "@/components/Services";
 import Gallery from "@/components/Gallery";
 import Booking from "@/components/Booking";
 import Testimonials from "@/components/Testimonials";
+import ServiceAreas from "@/components/ServiceAreas";
 import CTAStrip from "@/components/CTAStrip";
 import Footer from "@/components/Footer";
 import { site } from "@/config/site";
@@ -59,6 +60,7 @@ export default function Home() {
         <Hero />
         <About />
         <Services />
+        <ServiceAreas />
         <Gallery />
         <Booking />
         <Testimonials />

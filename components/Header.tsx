@@ -3,9 +3,16 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { site } from "@/config/site";
 
+const serviceDropdown = site.servicePages.length > 0
+  ? [
+      { href: "/services", label: "All Service Areas" },
+      ...site.servicePages.map((p) => ({ href: `/services/${p.slug}`, label: `${p.city}, TX` })),
+    ]
+  : null;
+
 const navLinks = [
   { href: "/#about", label: "About" },
-  { href: "/#services", label: "Services" },
+  { href: site.servicePages.length > 0 ? "/services" : "/#services", label: "Services", dropdown: serviceDropdown },
   { href: "/#gallery", label: "Gallery" },
   { href: "/#booking", label: "Booking" },
   { href: "/#contact", label: "Contact" },
@@ -84,12 +91,24 @@ export default function Header() {
 
         {/* Desktop nav */}
         <nav>
-          <ul className="hidden md:flex" style={{ gap: "34px", listStyle: "none" }}>
+          <ul className="hidden md:flex" style={{ gap: "34px", listStyle: "none", alignItems: "center" }}>
             {navLinks.map((link) => (
-              <li key={link.href}>
+              <li key={link.href} style={{ position: "relative" }} className={link.dropdown ? "nav-has-dropdown" : ""}>
                 <Link href={link.href} className="nav-link">
                   {link.label}
+                  {link.dropdown && <span style={{ marginLeft: "4px", fontSize: "0.6rem", opacity: 0.6, verticalAlign: "middle" }}>▾</span>}
                 </Link>
+                {link.dropdown && (
+                  <ul className="nav-dropdown" style={{ position: "absolute", top: "calc(100% + 12px)", left: "50%", transform: "translateX(-50%)", minWidth: "200px", background: "var(--color-cream)", border: "1px solid rgba(200,160,90,0.25)", borderRadius: "2px", boxShadow: "0 8px 24px rgba(59,42,30,0.12)", listStyle: "none", padding: "8px 0", zIndex: 1001 }}>
+                    {link.dropdown.map((item) => (
+                      <li key={item.href}>
+                        <Link href={item.href} style={{ display: "block", padding: "10px 18px", fontFamily: "var(--font-montserrat)", fontSize: "0.8rem", fontWeight: 500, color: "var(--color-brown)", textDecoration: "none", letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>
@@ -161,14 +180,25 @@ export default function Header() {
         <nav>
           <ul style={{ listStyle: "none", padding: 0, margin: 0, textAlign: "center" }}>
             {navLinks.map((link, i) => (
-              <li key={link.href} style={{ transform: open ? "translateY(0)" : "translateY(20px)", opacity: open ? 1 : 0, transition: `transform 0.4s ease ${i * 0.06}s, opacity 0.4s ease ${i * 0.06}s`, marginBottom: link.label === "Contact" ? "40px" : "8px" }}>
+              <li key={link.href} style={{ transform: open ? "translateY(0)" : "translateY(20px)", opacity: open ? 1 : 0, transition: `transform 0.4s ease ${i * 0.06}s, opacity 0.4s ease ${i * 0.06}s`, marginBottom: link.label === "Contact" ? "24px" : "4px" }}>
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  style={{ fontFamily: "var(--font-serif)", fontSize: link.label === "Blog" ? "1.1rem" : "2rem", fontWeight: 600, color: link.label === "Blog" ? "var(--color-gold)" : "var(--color-cream)", textDecoration: "none", letterSpacing: link.label === "Blog" ? "0.2em" : "0.04em", textTransform: link.label === "Blog" ? "uppercase" : "none", display: "block", padding: "10px 0" }}
+                  style={{ fontFamily: "var(--font-serif)", fontSize: link.label === "Blog" ? "1.1rem" : "2rem", fontWeight: 600, color: link.label === "Blog" ? "var(--color-gold)" : "var(--color-cream)", textDecoration: "none", letterSpacing: link.label === "Blog" ? "0.2em" : "0.04em", textTransform: link.label === "Blog" ? "uppercase" : "none", display: "block", padding: "8px 0" }}
                 >
                   {link.label}
                 </Link>
+                {link.dropdown && (
+                  <ul style={{ listStyle: "none", padding: 0, margin: "0 0 8px" }}>
+                    {link.dropdown.map((sub) => (
+                      <li key={sub.href}>
+                        <Link href={sub.href} onClick={() => setOpen(false)} style={{ fontFamily: "var(--font-montserrat)", fontSize: "0.8rem", fontWeight: 500, color: "var(--color-gold)", textDecoration: "none", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", padding: "4px 0", opacity: 0.75 }}>
+                          {sub.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>

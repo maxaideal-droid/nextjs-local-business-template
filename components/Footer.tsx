@@ -1,10 +1,11 @@
+import Link from "next/link";
 import { site } from "@/config/site";
 
 const navigate = [
-  { href: "#about", label: "About" },
-  { href: "#services", label: "Services & Pricing" },
-  { href: "#gallery", label: "Gallery" },
-  { href: "#booking", label: "Booking" },
+  { href: "/#about", label: "About" },
+  { href: "/#gallery", label: "Gallery" },
+  { href: "/#booking", label: "Booking" },
+  { href: "/blog", label: "Blog" },
 ];
 
 export default function Footer() {
@@ -47,9 +48,9 @@ export default function Footer() {
           <ul style={{ listStyle: "none" }}>
             {navigate.map((link) => (
               <li key={link.href} style={{ padding: "6px 0" }}>
-                <a href={link.href} style={{ color: "rgba(247,239,228,0.75)", fontSize: "14px", fontWeight: 300 }}>
+                <Link href={link.href} style={{ color: "rgba(247,239,228,0.75)", fontSize: "14px", fontWeight: 300, textDecoration: "none" }}>
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
@@ -57,14 +58,29 @@ export default function Footer() {
 
         <div>
           <h4 style={{ color: "var(--color-cream)", fontSize: "13px", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "18px", fontFamily: "var(--font-montserrat), sans-serif", fontWeight: 600 }}>
-            Services
+            Service Areas
           </h4>
           <ul style={{ listStyle: "none" }}>
-            {["Essential Service", "Premium Package", "Group / Events"].map((s) => (
-              <li key={s} style={{ padding: "6px 0", color: "rgba(247,239,228,0.75)", fontSize: "14px", fontWeight: 300 }}>
-                {s}
+            {site.servicePages.length > 0 ? (
+              <>
+                {site.servicePages.map((p) => (
+                  <li key={p.slug} style={{ padding: "6px 0" }}>
+                    <Link href={`/services/${p.slug}`} style={{ color: "rgba(247,239,228,0.75)", fontSize: "14px", fontWeight: 300, textDecoration: "none" }}>
+                      {p.city}, TX
+                    </Link>
+                  </li>
+                ))}
+                <li style={{ padding: "6px 0" }}>
+                  <Link href="/services" style={{ color: "rgba(247,239,228,0.75)", fontSize: "14px", fontWeight: 300, textDecoration: "none" }}>
+                    All Service Areas
+                  </Link>
+                </li>
+              </>
+            ) : (
+              <li style={{ padding: "6px 0", color: "rgba(247,239,228,0.75)", fontSize: "14px", fontWeight: 300 }}>
+                {site.serviceArea}
               </li>
-            ))}
+            )}
           </ul>
         </div>
 
