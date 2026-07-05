@@ -50,8 +50,8 @@ function checkPage(filePath, html) {
   // Title tag
   const title = $("title").first().text().trim();
   if (!title) errors.push("Missing <title> tag");
-  else if (title.length < 40) warnings.push(`Title too short (${title.length} chars): "${title}"`);
-  else if (title.length > 65) warnings.push(`Title too long (${title.length} chars): "${title}"`);
+  else if (title.length < 50) warnings.push(`Title too short (${title.length} chars): "${title}"`);
+  else if (title.length > 60) warnings.push(`Title too long (${title.length} chars): "${title}"`);
 
   // Meta description
   const desc = $('meta[name="description"]').attr("content") || "";

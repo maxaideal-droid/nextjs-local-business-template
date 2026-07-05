@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     url: `${site.domain}/`,
     title: `${site.name} — ${site.tagline}`,
     description: `${site.name} serves ${site.serviceArea}. Professional, mobile, and available now.`,
-    images: [{ url: "/about-brand.jpg", width: 600, height: 750 }],
+    images: [{ url: "/og/home.jpg", width: 1200, height: 630 }],
   },
 };
 
