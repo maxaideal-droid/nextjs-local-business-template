@@ -18,6 +18,6 @@ export const site = {
   // slug must match the folder name under app/services/[slug]/
   servicePages: [
     // { city: "McKinney", slug: "your-service-mckinney-tx", tagline: "30 miles away, no travel fee." },
-    // { city: "Frisco",   slug: "your-service-frisco-tx",   tagline: "$65 flat, Dolce Glow formula." },
+    // { city: "Frisco",   slug: "your-service-frisco-tx",   tagline: "Flat pricing, same premium service." },
   ] as { city: string; slug: string; tagline: string }[],
 };

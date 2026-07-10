@@ -1,3 +1,21 @@
+# Session Startup — run this every time a new conversation begins
+
+At the start of every session, before responding to any request, run all of the following automatically and output a single status report:
+
+1. `git log --oneline -3` — show the last 3 commits
+2. `git status` — flag any uncommitted changes
+3. `node scripts/fetch-gsc-data.mjs` — pull fresh GSC data (requires `.secrets/gsc-key.json`). If the key file does not exist, read `gsc-data/report.md` if present, otherwise note GSC data is unavailable.
+4. Read `gsc-data/report.md` — extract top opportunity keywords (impressions, 0 clicks), homepage position, new queries since last session.
+5. `node scripts/fetch-ga-data.mjs` — pull fresh GA4 data (same key). Fall back to the existing `ga-data/report.md` the same way.
+6. Read `ga-data/report.md` — extract sessions, users, engagement rate, top page, top traffic channel.
+7. Compare against previous rows in `seo-data/history.csv` — report deltas (up/down/flat), not just today's numbers.
+
+Then output a **Session Status** block: last 3 commits, GSC highlights, GA4 highlights with deltas, top 3 backlog items, and one recommended action. Keep it tight. Then ask what the owner wants to work on.
+
+**SEO priority rule:** SEO and content quality are #1. Search the web for current ranking strategies and SERP top-3 before any SEO decision — never rely on cached knowledge. See `SEO-PLAYBOOK.md` for ongoing operations.
+
+---
+
 # Local Business Template — Project Overview
 
 Next.js 15 starter for local business websites. Clone this template for each new client. Update `config/site.ts`, swap brand colors, replace placeholder content, and follow `SETUP.md`.
@@ -105,10 +123,15 @@ Fonts: Cormorant Garamond (script/italic), Playfair Display (headings), Montserr
 **SSG constraints — do NOT break these:**
 - No `cookies()`, `headers()`, or `searchParams` in server components
 - No `fetch(..., { cache: 'no-store' })` or `export const dynamic = 'force-dynamic'`
-- No runtime API routes
+- No runtime API routes (build-time route handlers with `export const dynamic = "force-static"` are fine — see `app/llms.txt/route.ts`)
 - Dynamic routes (`[slug]`) must implement `generateStaticParams`
 - Async params in dynamic routes: `params: Promise<{ slug: string }>` — must `await params`
 - All data fetched at **build time**, not request time
+
+**Rendering gotchas (learned the hard way — check every time):**
+- **A plain space after a closing inline tag (`</strong>`, `</b>`) gets EATEN in the static HTML output** — "…<strong>bold text</strong> next word" renders as "bold textnext". Always use `&nbsp;` after mid-sentence bold/emphasis.
+- **Fixed/sticky headers break anchor links** — any `#section` target scrolls underneath the header. Keep a global `[id] { scroll-margin-top: <header height + margin>px }` rule in `globals.css` and update it if the header grows (e.g., adding an announcement banner).
+- **View-source verify after every content change** — grep the built HTML in `out/` for the new text, schema, and links. The build passing does not mean the HTML says what you think.
 
 ---
 
@@ -132,15 +155,18 @@ Fonts: Cormorant Garamond (script/italic), Playfair Display (headings), Montserr
 
 # New Client Setup
 
-Follow `SETUP.md` in order. The 6 phases take under an hour:
-1. Local setup — update `config/site.ts`, swap colors, replace content
+Follow `SETUP.md` in order:
+1. Local setup — update `config/site.ts` + `scripts/site-config.mjs`, swap colors, replace content
 2. Deploy to Netlify
-3. Google Search Console verification + sitemap submission
-4. Google Analytics 4
+3. Google Search Console (Domain property + DNS verification preferred)
+4. Google Analytics 4 (+ Data API access for the daily report)
 5. Google Indexing API automation (GitHub Action)
-6. Ahrefs
+6. Daily SEO reporting (history CSV)
+7. Google Business Profile (owner does this — biggest local ranking factor)
+8. Ahrefs
+9. Netlify Forms lead capture (optional)
 
-After Phase 5, every push to `main` automatically notifies Google of all updated URLs. No manual GSC work after that.
+After Phase 5, every push to `main` automatically notifies Google of all updated URLs. Ongoing operations (citations, reviews, content cadence, AI visibility) live in `SEO-PLAYBOOK.md`.
 
 ---
 

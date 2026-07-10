@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "fetch-images": "node scripts/fetch-pexels.mjs",
-    "index-pages": "node scripts/index-pages.mjs"
+    "index-pages": "node scripts/index-pages.mjs",
+    "gsc": "node scripts/fetch-gsc-data.mjs",
+    "ga": "node scripts/fetch-ga-data.mjs",
+    "log-history": "node scripts/log-history.mjs",
+    "check-indexing": "node scripts/check-indexing.mjs"
   },
   "dependencies": {
     "next": "16.2.10",

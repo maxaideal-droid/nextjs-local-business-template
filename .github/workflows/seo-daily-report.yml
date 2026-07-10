@@ -1,0 +1,62 @@
+name: SEO Daily Report
+
+# Pulls fresh Search Console + GA4 data every morning, appends one row to
+# seo-data/history.csv (committed back to the repo), and uploads both full
+# reports as an artifact.
+#
+# Required GitHub secrets (Settings → Secrets and variables → Actions):
+#   GOOGLE_SERVICE_ACCOUNT_KEY — full JSON of the service account key (SETUP.md Phase 5)
+#   SITE_DOMAIN               — e.g. https://acmelocal.com
+#   GA4_PROPERTY_ID           — numeric GA4 property ID
+
+on:
+  schedule:
+    - cron: "0 13 * * *" # 8am CT (UTC-5) every day — adjust to your timezone
+  workflow_dispatch: # also allows manual trigger from the Actions tab
+
+permissions:
+  contents: write # needed to commit seo-data/history.csv back to the repo
+
+jobs:
+  fetch-seo-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch GSC data
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          SITE_DOMAIN: ${{ secrets.SITE_DOMAIN }}
+        run: node scripts/fetch-gsc-data.mjs
+
+      - name: Fetch GA4 data
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+        run: node scripts/fetch-ga-data.mjs
+
+      - name: Log daily history row
+        env:
+          SITE_DOMAIN: ${{ secrets.SITE_DOMAIN }}
+        run: node scripts/log-history.mjs
+
+      - name: Commit history CSV
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add seo-data/history.csv
+          git diff --staged --quiet || git commit -m "Log daily SEO/GA4 numbers"
+          git push
+
+      - name: Upload reports as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-report-${{ github.run_id }}
+          path: |
+            gsc-data/
+            ga-data/
+          retention-days: 30

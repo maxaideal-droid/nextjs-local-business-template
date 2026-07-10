@@ -43,12 +43,24 @@ Spin up a fully SEO-instrumented local business site in under an hour.
 
 ## Phase 3 — Google Search Console (~10 min)
 
-- [ ] Go to [search.google.com/search-console](https://search.google.com/search-console) → **Add property → URL prefix**
-- [ ] Enter the client domain (e.g. `https://acmelocal.com`)
-- [ ] Choose **HTML tag** verification → copy the `content="..."` value
-- [ ] Add it to `config/site.ts` as `gscVerification`
-- [ ] Push to GitHub → wait for Netlify deploy → click **Verify** in GSC
-- [ ] In GSC: **Sitemaps** → submit `https://yourdomain.com/sitemap.xml`
+Two property types — pick one:
+
+**Option A — Domain property (recommended, covers www + http + subdomains):**
+- [ ] Go to [search.google.com/search-console](https://search.google.com/search-console) → **Add property → Domain**
+- [ ] Enter the bare domain (e.g. `acmelocal.com`)
+- [ ] Verify via **DNS TXT record** — copy the value, add it at your DNS provider (Netlify DNS: Domain settings → DNS records → add TXT), wait a few minutes, click Verify
+- [ ] Note: HTML tag verification does NOT exist for Domain properties — leave `gscVerification` in `config/site.ts` empty and don't add one
+- [ ] The scripts expect this type by default: `GSC_PROPERTY` becomes `sc-domain:acmelocal.com` automatically
+
+**Option B — URL prefix property:**
+- [ ] **Add property → URL prefix** → enter `https://acmelocal.com`
+- [ ] Choose **HTML tag** verification → copy the `content="..."` value → add to `config/site.ts` as `gscVerification`
+- [ ] Push → wait for deploy → click **Verify**
+- [ ] Set `GSC_PROPERTY=https://acmelocal.com/` (URL-prefix format) in `scripts/site-config.mjs` and the GitHub secret
+
+Then either way:
+- [ ] In GSC: **Sitemaps** (left sidebar → Indexing → Sitemaps) → submit `sitemap.xml`
+- [ ] Only ever submit the actual sitemap file here — never paste an individual page URL into the sitemap box (it creates a permanent error entry). To nudge a single page, use **URL Inspection → Request Indexing** instead.
 
 > **Note:** After Phase 5 (Indexing API), you never need to manually submit URLs to GSC again — every push handles it automatically.
 
@@ -62,6 +74,12 @@ Spin up a fully SEO-instrumented local business site in under an hour.
 - [ ] Copy the Measurement ID (`G-XXXXXXXXXX`)
 - [ ] Add it to `config/site.ts` as `ga4`
 - [ ] Push → confirm GA4 shows data collection active (Realtime view)
+- [ ] Copy the numeric **Property ID** (Admin → Property → Property Settings — a number like `544251922`, different from the G- ID)
+- [ ] Put it in `scripts/site-config.mjs` as the `GA4_PROPERTY_ID` fallback (used by `npm run ga`)
+
+**For the daily GA4 report (do after Phase 5's service account exists):**
+- [ ] In GA4: **Admin → Property → Property Access Management → Add user** — paste the service account email, role **Viewer**
+- [ ] In [console.cloud.google.com](https://console.cloud.google.com), on your SEO project: enable the **Google Analytics Data API**
 
 ---
 
@@ -72,6 +90,7 @@ This makes every push to `main` automatically notify Google of all updated URLs.
 - [ ] Go to [console.cloud.google.com](https://console.cloud.google.com) → **Create new project**
   - Name it `[ClientName] SEO` (e.g. `Acme Local SEO`)
 - [ ] Enable **Web Search Indexing API** on that project
+- [ ] Also enable the **Google Search Console API** (powers `npm run gsc` reports and `npm run check-indexing`)
 - [ ] Go to **IAM & Admin → Service Accounts → Create service account**
   - Name: `indexing-bot`
 - [ ] Open the service account → **Keys tab → Add Key → JSON** → download the file
@@ -86,16 +105,63 @@ This makes every push to `main` automatically notify Google of all updated URLs.
   - Name: `SITE_DOMAIN`
   - Value: your live domain, e.g. `https://acmelocal.com`
 - [ ] Push any change → check the **Actions tab** → confirm green checkmark with ✓ next to each URL
+- [ ] For local script runs: save a copy of the JSON key at `.secrets/gsc-key.json` (already gitignored) — `npm run gsc`, `npm run ga`, and `npm run check-indexing` read it automatically
 
 ---
 
-## Phase 6 — Ahrefs (~5 min)
+## Phase 6 — Daily SEO Reporting (~10 min)
+
+The `SEO Daily Report` GitHub Action pulls GSC + GA4 data every morning, appends one row to `seo-data/history.csv` (committed to the repo — this is your day-over-day trend log), and uploads full reports as an artifact.
+
+- [ ] Update `scripts/site-config.mjs` — domain and GA4 property ID fallbacks
+- [ ] Add GitHub secret `GA4_PROPERTY_ID` (numeric ID from Phase 4)
+- [ ] Confirm secrets from Phase 5 exist: `GOOGLE_SERVICE_ACCOUNT_KEY`, `SITE_DOMAIN`
+- [ ] Adjust the cron in `.github/workflows/seo-daily-report.yml` to the client's timezone (default 8am CT)
+- [ ] Trigger it manually once (Actions tab → SEO Daily Report → Run workflow) — confirm it commits `seo-data/history.csv`
+- [ ] Verify locally: `npm run gsc && npm run ga && npm run log-history`
+
+> New sites show near-zero numbers for weeks. The CSV is the point — trends over time, not daily snapshots.
+
+---
+
+## Phase 7 — Google Business Profile (~30 min, owner must do this)
+
+The single biggest local ranking factor — map pack visibility depends on this, not the website.
+
+- [ ] Go to [business.google.com](https://business.google.com) → sign in with the business's Google account → **Add business**
+- [ ] Business name: exact legal/brand name — must match the website and all citations exactly
+- [ ] Category: pick the closest match from Google's predefined list (you cannot type a custom one; if the exact service doesn't exist, choose the nearest parent category)
+- [ ] If the business travels to customers (no storefront): choose **service-area business**, hide the street address, and list the cities/counties served — match the site's `serviceArea`
+- [ ] Hours: set real hours (avoid "open with no main hours" — it can stall review of other edits); "by appointment" details go in the description
+- [ ] Description: 750 chars, lead with service + city, real specifics, no keyword stuffing
+- [ ] Photos: 5+ real photos (work results, equipment, owner) — never stock images
+- [ ] Complete verification (video, postcard, or phone — whatever Google offers)
+- [ ] After verification: get the review link (**Ask for reviews** button) and start collecting — reviews from accounts with no review history often get filtered, so ask established Google users first
+- [ ] Don't embed a review widget on the site until 5+ public reviews exist — an empty widget is worse than none
+
+---
+
+## Phase 8 — Ahrefs (~5 min)
 
 - [ ] Add the site to Ahrefs
 - [ ] Copy the analytics `data-key` value
 - [ ] Copy the site verification `content` value
 - [ ] Add both to `config/site.ts` as `ahrefs` and `ahrefsSiteVerification`
 - [ ] Push
+
+---
+
+## Phase 9 — Lead Capture with Netlify Forms (optional, ~20 min)
+
+Free phone-number capture for offers (referral programs, discounts, quote requests) — no backend needed on a static site.
+
+- [ ] Build the claim/contact page as a plain HTML `<form>` with `data-netlify="true"`, a hidden `form-name` input, and a `netlify-honeypot="bot-field"` spam trap; set `action` to a static thank-you page (mark it `robots: { index: false }`)
+- [ ] In the Netlify dashboard: **Forms → Enable form detection** (off by default — the form records NOTHING until this is on)
+- [ ] Trigger a redeploy after enabling — forms register at deploy time
+- [ ] Test the pipe: `curl -X POST -d "form-name=yourform&name=Test&phone=000" https://yourdomain.com/yourpage` → expect 200 (404 means not registered yet)
+- [ ] Add a notification email: Forms → Form notifications
+- [ ] Submissions live in the Netlify dashboard (exportable as CSV) + your email
+- [ ] If pairing with a promo code shown on the thank-you page: the page is public, so protect via the booking system's promo settings (one use per client), not secrecy — and only promise online-code redemption if online payments actually exist; otherwise word it "mention the code when you pay"
 
 ---
 
@@ -107,6 +173,9 @@ This makes every push to `main` automatically notify Google of all updated URLs.
 - [ ] GitHub Actions: green checkmark on the last push to `main`
 - [ ] Local build: `npm run build` → 0 errors, 0 warnings, every route shows `○ (Static)`
 - [ ] View-source check: HTML contains rendered content and JSON-LD schema blocks
+- [ ] `https://yourdomain.com/llms.txt` loads and shows real business details (auto-generated — edit `app/llms.txt/route.ts` to add pricing specifics)
+- [ ] `npm run check-indexing` runs and reports every sitemap URL (new pages take days–weeks to index; that's normal)
+- [ ] Read `SEO-PLAYBOOK.md` and schedule the ongoing work: citations, GBP posts, reviews, monthly content
 
 ---
 
